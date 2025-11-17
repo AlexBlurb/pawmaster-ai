@@ -220,84 +220,65 @@
 
     <script>
         async function askAI() {
-            const question = document.getElementById('question').value.trim();
-            const btn = document.getElementById('askBtn');
-            const loading = document.getElementById('loading');
-            const responseSection = document.getElementById('responseSection');
-            const responseDiv = document.getElementById('response');
-            
-            // Проверка ввода
-            if (!question) {
-                showError('Пожалуйста, опишите проблему с питомцем');
-                return;
-            }
-            
-            if (question.length < 10) {
-                showError('Опишите проблему подробнее, чтобы кинолог мог помочь');
-                return;
-            }
-            
-            // Показываем загрузку
-            btn.innerHTML = '⏳ Думаю...';
-            btn.disabled = true;
-            loading.style.display = 'block';
-            responseSection.style.display = 'none';
-            
-            try {
-                // Прямой запрос к GigaChat API
-                const response = await fetch('https://gigachat.api.sber.ru/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer 0199f13d-237f-7f59-b35b-768fbef09ee4',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        "model": "GigaChat",
-                        "messages": [
-                            {
-                                "role": "system",
-                                "content": `Ты - Алексей, профессиональный кинолог с 15-летним опытом работы в России. 
-                                Отвечай КРАТКО и ПО ДЕЛУ. Структура ответа:
-                                1) В чем проблема (1 предложение)
-                                2) План действий на сегодня (3-5 конкретных шагов)
-                                3) Что купить в российских зоомагазинах (Зоохаус, Петшоп)
-                                4) Когда ждать результат
-                                
-                                Будь доброжелательным, но строгим. Не ставь диагнозы. При серьезных проблемах направляй к ветеринару.`
-                            },
-                            {
-                                "role": "user",
-                                "content": question
-                            }
-                        ],
-                        "temperature": 0.7,
-                        "max_tokens": 600
-                    }),
-                    mode: 'cors'
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка API: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const answer = data.choices[0].message.content;
-                
-                // Показываем ответ
-                responseDiv.innerHTML = formatResponse(answer);
-                responseSection.className = 'response-section';
-                responseSection.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                showError('Не удалось подключиться к AI-кинологу. Пожалуйста, попробуйте позже или обновите страницу.');
-            } finally {
-                // Восстанавливаем кнопку
-                btn.innerHTML = '🐕 Спросить у кинолога';
-                btn.disabled = false;
-                loading.style.display = 'none';
-            }
+    const question = document.getElementById('question').value.trim();
+    const btn = document.getElementById('askBtn');
+    const loading = document.getElementById('loading');
+    const responseSection = document.getElementById('responseSection');
+    const responseDiv = document.getElementById('response');
+    
+    if (!question) {
+        showError('Пожалуйста, опишите проблему с питомцем');
+        return;
+    }
+    
+    if (question.length < 5) {
+        showError('Опишите проблему подробнее, чтобы кинолог мог помочь');
+        return;
+    }
+    
+    btn.innerHTML = '⏳ Думаю...';
+    btn.disabled = true;
+    loading.style.display = 'block';
+    responseSection.style.display = 'none';
+    
+    try {
+        // 🔥 ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ URL GOOGLE APPS SCRIPT
+        const proxyUrl = 'https://script.google.com/macros/s/ВАШ_РЕАЛЬНЫЙ_ID/exec';
+        
+        console.log('Отправляю запрос к:', proxyUrl);
+        
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question
+            })
+        });
+        
+        console.log('Получен ответ, статус:', response.status);
+        
+        const data = await response.json();
+        console.log('Данные ответа:', data);
+        
+        if (data.success) {
+            responseDiv.innerHTML = formatResponse(data.answer);
+            responseSection.className = 'response-section';
+            responseSection.style.display = 'block';
+        } else {
+            throw new Error(data.error || 'Неизвестная ошибка');
         }
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showError('Ошибка соединения с AI-кинологом. Пожалуйста, попробуйте еще раз через минуту. Ошибка: ' + error.message);
+    } finally {
+        btn.innerHTML = '🐕 Спросить у кинолога';
+        btn.disabled = false;
+        loading.style.display = 'none';
+    }
+}
         
         function showError(message) {
             const responseSection = document.getElementById('responseSection');
