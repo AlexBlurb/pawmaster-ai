@@ -231,23 +231,17 @@
         return;
     }
     
-    if (question.length < 5) {
-        showError('Опишите проблему подробнее, чтобы кинолог мог помочь');
-        return;
-    }
-    
     btn.innerHTML = '⏳ Думаю...';
     btn.disabled = true;
     loading.style.display = 'block';
     responseSection.style.display = 'none';
     
     try {
-        // 🔥 ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ URL GOOGLE APPS SCRIPT
-        const proxyUrl = 'https://script.google.com/macros/s/AKfycbwgMv4lfA4YCb5UBhPErLpb80fQgzdLUl49XjwlOzfbDTuouP5EAWG1LZNnla9BTmtI/exec';
+        // 🔥 ИСПОЛЬЗУЕМ CORS ПРОКСИ ДЛЯ GOOGLE APPS SCRIPT
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
+        const gasUrl = 'https://script.google.com/macros/s/AKfycbwgMv4lfA4YCb5UBhPErLpb80fQgzdLUl49XjwlOzfbDTuouP5EAWG1LZNnla9BTmtI/exec';
         
-        console.log('Отправляю запрос к:', proxyUrl);
-        
-        const response = await fetch(proxyUrl, {
+        const response = await fetch(proxyUrl + encodeURIComponent(gasUrl), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -257,10 +251,7 @@
             })
         });
         
-        console.log('Получен ответ, статус:', response.status);
-        
         const data = await response.json();
-        console.log('Данные ответа:', data);
         
         if (data.success) {
             responseDiv.innerHTML = formatResponse(data.answer);
@@ -272,7 +263,7 @@
         
     } catch (error) {
         console.error('Ошибка:', error);
-        showError('Ошибка соединения с AI-кинологом. Пожалуйста, попробуйте еще раз через минуту. Ошибка: ' + error.message);
+        showError('Ошибка соединения. Попробуйте еще раз. Ошибка: ' + error.message);
     } finally {
         btn.innerHTML = '🐕 Спросить у кинолога';
         btn.disabled = false;
