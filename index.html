@@ -219,57 +219,70 @@
     </div>
 
     <script>
+        // 🔥 РАБОЧИЙ AI БЭКЕНД
+        const backendUrl = 'https://alexblurb.pythonanywhere.com/ask';
+
         async function askAI() {
-    const question = document.getElementById('question').value.trim();
-    const btn = document.getElementById('askBtn');
-    const loading = document.getElementById('loading');
-    const responseSection = document.getElementById('responseSection');
-    const responseDiv = document.getElementById('response');
-    
-    if (!question) {
-        showError('Пожалуйста, опишите проблему с питомцем');
-        return;
-    }
-    
-    btn.innerHTML = '⏳ Думаю...';
-    btn.disabled = true;
-    loading.style.display = 'block';
-    responseSection.style.display = 'none';
-    
-    try {
-        // 🔥 ИСПОЛЬЗУЕМ CORS ПРОКСИ ДЛЯ GOOGLE APPS SCRIPT
-        const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
-        const gasUrl = 'https://script.google.com/macros/s/AKfycbwgMv4lfA4YCb5UBhPErLpb80fQgzdLUl49XjwlOzfbDTuouP5EAWG1LZNnla9BTmtI/exec';
-        
-        const response = await fetch(proxyUrl + encodeURIComponent(gasUrl), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                question: question
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            responseDiv.innerHTML = formatResponse(data.answer);
-            responseSection.className = 'response-section';
-            responseSection.style.display = 'block';
-        } else {
-            throw new Error(data.error || 'Неизвестная ошибка');
+            const question = document.getElementById('question').value.trim();
+            const btn = document.getElementById('askBtn');
+            const loading = document.getElementById('loading');
+            const responseSection = document.getElementById('responseSection');
+            const responseDiv = document.getElementById('response');
+            
+            if (!question) {
+                showError('Пожалуйста, опишите проблему с питомцем');
+                return;
+            }
+            
+            if (question.length < 5) {
+                showError('Опишите проблему подробнее, чтобы кинолог мог помочь');
+                return;
+            }
+            
+            btn.innerHTML = '⏳ Думаю...';
+            btn.disabled = true;
+            loading.style.display = 'block';
+            responseSection.style.display = 'none';
+            
+            try {
+                console.log('Отправляю вопрос к AI:', question);
+                
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question
+                    })
+                });
+                
+                console.log('Получен ответ, статус:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Данные ответа:', data);
+                
+                if (data.success) {
+                    responseDiv.innerHTML = formatResponse(data.answer);
+                    responseSection.className = 'response-section';
+                    responseSection.style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Неизвестная ошибка AI');
+                }
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Ошибка соединения с AI-кинологом. Пожалуйста, попробуйте еще раз через минуту. Ошибка: ' + error.message);
+            } finally {
+                btn.innerHTML = '🐕 Спросить у кинолога';
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
         }
-        
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showError('Ошибка соединения. Попробуйте еще раз. Ошибка: ' + error.message);
-    } finally {
-        btn.innerHTML = '🐕 Спросить у кинолога';
-        btn.disabled = false;
-        loading.style.display = 'none';
-    }
-}
         
         function showError(message) {
             const responseSection = document.getElementById('responseSection');
@@ -281,14 +294,13 @@
         }
         
         function formatResponse(text) {
-            // Простое форматирование текста
             return text.split('\n').map(line => {
                 if (line.trim() === '') return '<br>';
                 return `<p>${line}</p>`;
             }).join('');
         }
         
-        // Enter для отправки (кроме Shift+Enter)
+        // Enter для отправки
         document.getElementById('question').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
