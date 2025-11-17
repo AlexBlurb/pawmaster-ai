@@ -1,69 +1,221 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>PawMaster AI - Ваш кинолог</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawMaster AI - Ваш персональный кинолог</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 600px; 
-            margin: 40px auto; 
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
             color: white;
+            padding: 40px 30px;
+            text-align: center;
         }
-        .container { 
-            background: rgba(255,255,255,0.1); 
-            padding: 30px; 
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
-        h1 { text-align: center; margin-bottom: 30px; }
-        textarea { 
-            width: 100%; 
-            height: 120px; 
-            margin: 15px 0; 
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .question-section {
+            margin-bottom: 30px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 120px;
             padding: 15px;
-            border: none; 
+            border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s;
         }
-        button { 
-            background: #FF6B6B; 
-            color: white; 
-            border: none; 
+        
+        textarea:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            border: none;
             padding: 15px 30px;
-            border-radius: 25px; 
-            font-size: 18px; 
+            border-radius: 10px;
+            font-size: 18px;
             cursor: pointer;
             width: 100%;
+            transition: transform 0.2s;
         }
-        button:hover { background: #FF5252; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        .response { 
-            margin-top: 25px; 
-            padding: 20px; 
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px; 
-            border-left: 4px solid #4ECDC4;
+        
+        .btn:hover {
+            transform: translateY(-2px);
         }
-        .loading { display: none; text-align: center; }
+        
+        .btn:disabled {
+            background: #9CA3AF;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563EB;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .response-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border-left: 5px solid #2563EB;
+            display: none;
+        }
+        
+        .response-section h3 {
+            color: #2563EB;
+            margin-bottom: 15px;
+        }
+        
+        .error {
+            border-left-color: #EF4444;
+            background: #FEF2F2;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .instructions {
+            background: #FFFBEB;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #F59E0B;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🐾 PawMaster AI</h1>
-        <p>Ваш персональный AI-кинолог</p>
-        
-        <textarea id="question" placeholder="Например: Щенок 3 месяца грызет обувь, что делать?"></textarea>
-        
-        <button onclick="askAI()" id="askBtn">Спросить у кинолога</button>
-        
-        <div class="loading" id="loading">
-            <p>🤔 AI-кинолог думает...</p>
+        <div class="header">
+            <h1>🐾 PawMaster AI</h1>
+            <p>Ваш персональный AI-кинолог на основе GigaChat</p>
         </div>
         
-        <div id="response" class="response"></div>
+        <div class="content">
+            <div class="question-section">
+                <h2>Задайте вопрос кинологу</h2>
+                <p style="margin: 10px 0 20px 0; color: #666;">Опишите проблему с питомцем, и AI-кинолог даст пошаговое решение</p>
+                
+                <textarea id="question" placeholder="Пример: Щенок 4 месяца грызет мебель и обувь, что делать? 
+Или: Собака боится гулять на улице, как помочь?
+Или: Кот метит углы в квартире, как отучить?"></textarea>
+                
+                <button class="btn" onclick="askAI()" id="askBtn" style="margin-top: 15px;">
+                    🐕 Спросить у кинолога
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>AI-кинолог анализирует вопрос...</p>
+            </div>
+            
+            <div class="response-section" id="responseSection">
+                <h3>🤖 Ответ AI-кинолога:</h3>
+                <div id="response"></div>
+            </div>
+            
+            <div class="instructions">
+                <h3>💡 Как пользоваться:</h3>
+                <p>1. Подробно опишите проблему с питомцем</p>
+                <p>2. Нажмите кнопку "Спросить у кинолога"</p>
+                <p>3. Получите пошаговый план решения</p>
+                <p>4. Следуйте рекомендациям AI-специалиста</p>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⏰</div>
+                    <h3>24/7</h3>
+                    <p>Работает круглосуточно</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Профессионально</h3>
+                    <p>На основе GigaChat</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💰</div>
+                    <h3>Доступно</h3>
+                    <p>Дешевле услуг кинолога</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -71,24 +223,29 @@
             const question = document.getElementById('question').value.trim();
             const btn = document.getElementById('askBtn');
             const loading = document.getElementById('loading');
+            const responseSection = document.getElementById('responseSection');
             const responseDiv = document.getElementById('response');
             
+            // Проверка ввода
             if (!question) {
-                responseDiv.innerHTML = '<p style="color: #FF6B6B">Пожалуйста, введите вопрос</p>';
+                showError('Пожалуйста, опишите проблему с питомцем');
                 return;
             }
             
-            btn.innerHTML = 'Думаю...';
+            if (question.length < 10) {
+                showError('Опишите проблему подробнее, чтобы кинолог мог помочь');
+                return;
+            }
+            
+            // Показываем загрузку
+            btn.innerHTML = '⏳ Думаю...';
             btn.disabled = true;
             loading.style.display = 'block';
-            responseDiv.innerHTML = '';
+            responseSection.style.display = 'none';
             
             try {
-                // Используем CORS прокси
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const apiUrl = encodeURIComponent('https://gigachat.api.sber.ru/api/v1/chat/completions');
-                
-                const response = await fetch(proxyUrl + apiUrl, {
+                // Прямой запрос к GigaChat API
+                const response = await fetch('https://gigachat.api.sber.ru/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Authorization': 'Bearer 0199f13d-237f-7f59-b35b-768fbef09ee4',
@@ -99,7 +256,14 @@
                         "messages": [
                             {
                                 "role": "system",
-                                "content": "Ты кинолог Алексей. Отвечай кратко и по делу. Структура: 1) Проблема, 2) 3 шага на сегодня, 3) Что купить в российских магазинах, 4) Результат. Будь доброжелательным."
+                                "content": `Ты - Алексей, профессиональный кинолог с 15-летним опытом работы в России. 
+                                Отвечай КРАТКО и ПО ДЕЛУ. Структура ответа:
+                                1) В чем проблема (1 предложение)
+                                2) План действий на сегодня (3-5 конкретных шагов)
+                                3) Что купить в российских зоомагазинах (Зоохаус, Петшоп)
+                                4) Когда ждать результат
+                                
+                                Будь доброжелательным, но строгим. Не ставь диагнозы. При серьезных проблемах направляй к ветеринару.`
                             },
                             {
                                 "role": "user",
@@ -107,31 +271,61 @@
                             }
                         ],
                         "temperature": 0.7,
-                        "max_tokens": 500
-                    })
+                        "max_tokens": 600
+                    }),
+                    mode: 'cors'
                 });
                 
-                if (!response.ok) throw new Error('Ошибка API');
+                if (!response.ok) {
+                    throw new Error(`Ошибка API: ${response.status}`);
+                }
                 
                 const data = await response.json();
-                responseDiv.innerHTML = `<strong>Ответ кинолога:</strong><br>${data.choices[0].message.content}`;
+                const answer = data.choices[0].message.content;
+                
+                // Показываем ответ
+                responseDiv.innerHTML = formatResponse(answer);
+                responseSection.className = 'response-section';
+                responseSection.style.display = 'block';
                 
             } catch (error) {
-                responseDiv.innerHTML = `<p style="color: #FF6B6B">Ошибка: ${error.message}. Попробуйте обновить страницу.</p>`;
+                console.error('Ошибка:', error);
+                showError('Не удалось подключиться к AI-кинологу. Пожалуйста, попробуйте позже или обновите страницу.');
+            } finally {
+                // Восстанавливаем кнопку
+                btn.innerHTML = '🐕 Спросить у кинолога';
+                btn.disabled = false;
+                loading.style.display = 'none';
             }
-            
-            btn.innerHTML = 'Спросить у кинолога';
-            btn.disabled = false;
-            loading.style.display = 'none';
         }
         
-        // Enter для отправки
-        document.getElementById('question').addEventListener('keypress', function(e) {
+        function showError(message) {
+            const responseSection = document.getElementById('responseSection');
+            const responseDiv = document.getElementById('response');
+            
+            responseDiv.innerHTML = `<p style="color: #EF4444;">${message}</p>`;
+            responseSection.className = 'response-section error';
+            responseSection.style.display = 'block';
+        }
+        
+        function formatResponse(text) {
+            // Простое форматирование текста
+            return text.split('\n').map(line => {
+                if (line.trim() === '') return '<br>';
+                return `<p>${line}</p>`;
+            }).join('');
+        }
+        
+        // Enter для отправки (кроме Shift+Enter)
+        document.getElementById('question').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 askAI();
             }
         });
+        
+        // Фокус на текстовое поле при загрузке
+        document.getElementById('question').focus();
     </script>
 </body>
 </html>
