@@ -1,1 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PawMaster AI - Ваш кинолог</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 40px auto; 
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container { 
+            background: rgba(255,255,255,0.1); 
+            padding: 30px; 
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { text-align: center; margin-bottom: 30px; }
+        textarea { 
+            width: 100%; 
+            height: 120px; 
+            margin: 15px 0; 
+            padding: 15px;
+            border: none; 
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        button { 
+            background: #FF6B6B; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px;
+            border-radius: 25px; 
+            font-size: 18px; 
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background: #FF5252; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .response { 
+            margin-top: 25px; 
+            padding: 20px; 
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px; 
+            border-left: 4px solid #4ECDC4;
+        }
+        .loading { display: none; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐾 PawMaster AI</h1>
+        <p>Ваш персональный AI-кинолог</p>
+        
+        <textarea id="question" placeholder="Например: Щенок 3 месяца грызет обувь, что делать?"></textarea>
+        
+        <button onclick="askAI()" id="askBtn">Спросить у кинолога</button>
+        
+        <div class="loading" id="loading">
+            <p>🤔 AI-кинолог думает...</p>
+        </div>
+        
+        <div id="response" class="response"></div>
+    </div>
 
+    <script>
+        async function askAI() {
+            const question = document.getElementById('question').value.trim();
+            const btn = document.getElementById('askBtn');
+            const loading = document.getElementById('loading');
+            const responseDiv = document.getElementById('response');
+            
+            if (!question) {
+                responseDiv.innerHTML = '<p style="color: #FF6B6B">Пожалуйста, введите вопрос</p>';
+                return;
+            }
+            
+            btn.innerHTML = 'Думаю...';
+            btn.disabled = true;
+            loading.style.display = 'block';
+            responseDiv.innerHTML = '';
+            
+            try {
+                // Используем CORS прокси
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const apiUrl = encodeURIComponent('https://gigachat.api.sber.ru/api/v1/chat/completions');
+                
+                const response = await fetch(proxyUrl + apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer 0199f13d-237f-7f59-b35b-768fbef09ee4',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "model": "GigaChat",
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": "Ты кинолог Алексей. Отвечай кратко и по делу. Структура: 1) Проблема, 2) 3 шага на сегодня, 3) Что купить в российских магазинах, 4) Результат. Будь доброжелательным."
+                            },
+                            {
+                                "role": "user",
+                                "content": question
+                            }
+                        ],
+                        "temperature": 0.7,
+                        "max_tokens": 500
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Ошибка API');
+                
+                const data = await response.json();
+                responseDiv.innerHTML = `<strong>Ответ кинолога:</strong><br>${data.choices[0].message.content}`;
+                
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color: #FF6B6B">Ошибка: ${error.message}. Попробуйте обновить страницу.</p>`;
+            }
+            
+            btn.innerHTML = 'Спросить у кинолога';
+            btn.disabled = false;
+            loading.style.display = 'none';
+        }
+        
+        // Enter для отправки
+        document.getElementById('question').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askAI();
+            }
+        });
+    </script>
+</body>
+</html>
